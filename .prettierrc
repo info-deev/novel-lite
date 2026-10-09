@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schemastore.org",
+  "semi": true,
+  "singleQuote": true,
+  "arrowParens": "avoid",
+  "trailingComma": "all",
+  "endOfLine": "auto",
+  "htmlWhitespaceSensitivity": "ignore"
+}

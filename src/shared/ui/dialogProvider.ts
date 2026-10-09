@@ -28,7 +28,7 @@ function settle(value: boolean): void {
 export function confirmDialog(options: ConfirmOptions): Promise<boolean> {
   // Повторный вызов, пока открыт предыдущий диалог, отклоняет его.
   settle(false);
-  return new Promise<boolean>((resolve) => {
+  return new Promise<boolean>(resolve => {
     state.value = { ...options, id: ++seq, resolve };
   });
 }
