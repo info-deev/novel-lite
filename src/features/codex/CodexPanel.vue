@@ -4,6 +4,7 @@ import { useCodexStore } from '@/stores/codex';
 import type { Character } from '@/core/types';
 import BaseButton from '@/shared/ui/BaseButton.vue';
 import EmptyState from '@/shared/ui/EmptyState.vue';
+import { confirmDialog } from '@/shared/ui/dialogProvider';
 
 const codex = useCodexStore();
 const search = ref('');
@@ -30,10 +31,15 @@ function update(patch: Partial<Omit<Character, 'id'>>): void {
   if (active.value) codex.update(active.value.id, patch);
 }
 
-function removeActive(): void {
-  if (active.value && confirm(`Удалить «${active.value.name}» из кодекса?`)) {
-    codex.remove(active.value.id);
-  }
+async function removeActive(): Promise<void> {
+  if (!active.value) return;
+  const ok = await confirmDialog({
+    title: 'Удалить из кодекса?',
+    message: `Персонаж «${active.value.name}» будет удалён.`,
+    confirmText: 'Удалить',
+    danger: true,
+  });
+  if (ok) codex.remove(active.value.id);
 }
 
 const fields = [
