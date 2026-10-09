@@ -9,12 +9,27 @@ import { eventBus, AppEvents } from '@/core/eventBus';
 import { STATUS_LABELS, SCENE_STATUSES, type SceneStatus } from '@/core/types';
 import { Button } from '@/shared/ui/components/button';
 import { EmptyState } from '@/shared/ui/components/empty-state';
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/components/select';
 
 const book = useBookStore();
 const codex = useCodexStore();
 
 const showMeta = ref(true);
 const savedAt = ref<string | null>(null);
+
+/**
+ * Служебное значение Select для варианта «POV не задан».
+ * reka-ui запрещает пустую строку в качестве value у SelectItem,
+ * поэтому используется непустой маркер, который мапится в null при сохранении.
+ */
+const NO_POV = '__no_pov__';
 
 const editor = useEditor({
   content: book.activeScene?.content ?? '',
@@ -143,13 +158,22 @@ function setStatus(status: SceneStatus): void {
         @input="book.updateScene(scene.id, { title: ($event.target as HTMLInputElement).value })"
       />
       <span class="hidden text-xs text-muted-foreground md:inline">{{ actTitle }}</span>
-      <select
-        :value="scene.status"
-        class="h-8 rounded-md border border-input bg-secondary px-2 text-xs text-secondary-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        @change="setStatus(($event.target as HTMLSelectElement).value as SceneStatus)"
+      <!-- Статус сцены: shadcn Select вместо нативного <select> -->
+      <SelectRoot
+        :model-value="scene.status"
+        @update:model-value="setStatus($event as SceneStatus)"
       >
-        <option v-for="s in SCENE_STATUSES" :key="s" :value="s">{{ STATUS_LABELS[s] }}</option>
-      </select>
+        <SelectTrigger size="sm" class="w-auto min-w-24 shrink-0 gap-1">
+          <SelectValue placeholder="Статус" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="s in SCENE_STATUSES" :key="s" :value="s">
+              {{ STATUS_LABELS[s] }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </SelectRoot>
       <span class="text-xs tabular-nums text-muted-foreground" :title="`Символов: ${charCount}`">
         {{ scene.wordCount }} сл.
       </span>
@@ -177,14 +201,21 @@ function setStatus(status: SceneStatus): void {
         </div>
         <div class="space-y-1">
           <label class="text-xs font-medium text-muted-foreground">POV — точка зрения</label>
-          <select
-            :value="scene.pov ?? ''"
-            class="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            @change="book.updateScene(scene.id, { pov: ($event.target as HTMLSelectElement).value || null })"
+          <!-- POV сцены: shadcn Select вместо нативного <select> -->
+          <SelectRoot
+            :model-value="scene.pov ?? NO_POV"
+            @update:model-value="book.updateScene(scene.id, { pov: $event === NO_POV ? null : String($event) })"
           >
-            <option value="">— не задан —</option>
-            <option v-for="c in codex.sorted" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="— не задан —" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem :value="NO_POV">— не задан —</SelectItem>
+                <SelectItem v-for="c in codex.sorted" :key="c.id" :value="c.id">{{ c.name }}</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </SelectRoot>
           <p v-if="povName" class="text-xs text-muted-foreground">Рассказывает: <span class="text-foreground">{{ povName }}</span></p>
         </div>
       </div>
