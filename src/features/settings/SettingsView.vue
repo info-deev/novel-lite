@@ -80,14 +80,14 @@ function setTheme(theme: ThemeName): void {
   settings.setTheme(theme);
 }
 
-function onBookTitle(value: string): void {
-  book.updateBook({ title: value });
+function onBookTitle(value: string | number): void {
+  book.updateBook({ title: String(value) });
 }
-function onBookAuthor(value: string): void {
-  book.updateBook({ author: value });
+function onBookAuthor(value: string | number): void {
+  book.updateBook({ author: String(value) });
 }
-function onBookSynopsis(value: string): void {
-  book.updateBook({ synopsis: value });
+function onBookSynopsis(value: string | number): void {
+  book.updateBook({ synopsis: String(value) });
 }
 
 async function exportJson(): Promise<void> {
@@ -197,34 +197,57 @@ async function resetDemo(): Promise<void> {
             {{ health === 'ok' ? 'Соединение установлено' : health === 'fail' ? 'Сервер недоступен' : 'Проверка…' }}
           </span>
         </div>
-        <div class="flex items-end gap-2">
-          <BaseInput v-model="form.endpoint" label="Endpoint" placeholder="http://localhost:11434" class="flex-1" />
-          <Button variant="secondary" size="md" :disabled="ai.modelsLoading" @click="void refreshModels()">
-            {{ ai.modelsLoading ? 'Загрузка…' : '⟳ Обновить' }}
-          </Button>
-        </div>
-        <BaseSelect
+        <FormField label="Endpoint">
+          <template #default="{ id }">
+            <div class="flex items-end gap-2">
+              <Input
+                :id="id"
+                v-model="form.endpoint"
+                placeholder="http://localhost:11434"
+                class="flex-1"
+              />
+              <Button variant="secondary" size="md" :disabled="ai.modelsLoading" @click="void refreshModels()">
+                {{ ai.modelsLoading ? 'Загрузка…' : '⟳ Обновить' }}
+              </Button>
+            </div>
+          </template>
+        </FormField>
+        <FormField
           v-if="modelOptions.length > 0"
-          v-model="form.model"
           label="Модель"
-          :options="modelOptions"
-          :loading="ai.modelsLoading"
           hint="Список подтягивается автоматически с сервера Ollama"
-        />
+        >
+          <SelectRoot v-model="form.model">
+            <SelectTrigger>
+              <SelectValue placeholder="Выберите модель" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem v-for="opt in modelOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </SelectRoot>
+        </FormField>
         <p v-else-if="ai.modelsError" class="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs leading-relaxed text-destructive">
           ⚠ {{ ai.modelsError }}
         </p>
-        <BaseInput v-else v-model="form.model" label="Модель" placeholder="llama3.1" />
+        <FormField v-else label="Модель">
+          <Input v-model="form.model" placeholder="llama3.1" />
+        </FormField>
         <p v-if="modelOptions.length === 0 && !ai.modelsError" class="-mt-1 text-xs text-muted-foreground">
           Модели не загружены — укажите название вручную или нажмите «Обновить».
         </p>
-        <BaseTextarea v-model="form.systemPrompt" label="Системный промпт" :rows="4" />
-        <BaseTextarea
-          v-model="form.scenePrompt"
+        <FormField label="Системный промпт">
+          <Textarea v-model="form.systemPrompt" :rows="4" />
+        </FormField>
+        <FormField
           label="Промпт контекста сцены"
-          :rows="4"
           hint="Доступные переменные: {title}, {synopsis}, {content}"
-        />
+        >
+          <Textarea v-model="form.scenePrompt" :rows="4" />
+        </FormField>
         <div class="flex flex-wrap gap-2 pt-1">
           <Button variant="primary" size="sm" @click="apply">Сохранить</Button>
           <Button variant="secondary" size="sm" @click="checkConnection">Проверить соединение</Button>

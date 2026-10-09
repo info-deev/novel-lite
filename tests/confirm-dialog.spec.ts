@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import ConfirmDialog from '@/shared/ui/ConfirmDialog.vue';
+import ConfirmDialog from '@/shared/ui/components/dialog/ConfirmDialog.vue';
 import { confirmDialog, acceptConfirm, rejectConfirm, useConfirmState } from '@/shared/ui/dialogProvider';
 import { useBookStore } from '@/stores/book';
 
