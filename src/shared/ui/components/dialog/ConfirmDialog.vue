@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/components/dialog';
 import { Button } from '@/shared/ui/components/button';
-import { acceptConfirm, rejectConfirm, useConfirmState } from '@/shared/ui/dialogProvider';
+import { rejectConfirm, useConfirmState } from '@/shared/ui/dialogProvider';
 
 const TITLE_ID = 'confirm-dialog-title';
 const { state } = useConfirmState();
