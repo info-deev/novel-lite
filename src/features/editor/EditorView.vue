@@ -2,7 +2,7 @@
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import CharacterCount from '@tiptap/extension-character-count';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { eventBus, AppEvents } from '@/core/eventBus';
@@ -72,14 +72,33 @@ function flushActiveScene(): void {
   // чтобы возврат из настроек показывал актуальный текст.
   const ed = editor.value;
   const scene = book.activeScene;
-  if (ed && scene) {
+  if (ed && scene && !ed.isDestroyed) {
     const html = ed.getHTML();
     if (html !== scene.content) book.updateScene(scene.id, { content: html });
   }
   void book.saveNow();
 }
 
+// useEditor() выше (в том же setup-скоупе) зарегистрировал СВОЙ beforeUnmount-хук,
+// который уничтожает Tiptap. Хуки выполняются в порядке регистрации, поэтому наш
+// flush переставляется ПЕРЕД хуком useEditor — иначе он работал бы по уже
+// уничтоженному редактору и падал при переключении Редактор → Доска/Настройки.
+type Hook = () => void;
+
 onBeforeUnmount(flushActiveScene);
+const instance = getCurrentInstance();
+if (instance) {
+  // Внутренний массив beforeUnmount-хуков инстанса (поле `bu`, не экспортируется типами).
+  const internals = instance as unknown as { bu?: Hook[] };
+  const hooks = internals.bu;
+  if (hooks && hooks.length > 1) {
+    const ours = hooks[hooks.length - 1]; // только что добавленный wrapped-хук
+    if (ours) {
+      hooks.unshift(ours);
+      hooks.pop();
+    }
+  }
+}
 
 function onVisibilityChange(): void {
   if (document.visibilityState === 'hidden') flushActiveScene();
