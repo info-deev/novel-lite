@@ -4,6 +4,14 @@ import { useAiStore } from '@/stores/ai';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
 import { Button } from '@/shared/ui/components/button';
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/components/select';
 
 const ai = useAiStore();
 const book = useBookStore();
@@ -43,15 +51,25 @@ onMounted(() => {
   <div class="flex h-full min-h-0 flex-col">
     <header class="flex shrink-0 items-center justify-end gap-1 border-b border-border px-3 py-2">
       <div class="flex items-center gap-1">
-        <select
+        <!-- Выбор модели: shadcn Select вместо нативного <select> -->
+        <SelectRoot
           v-if="ai.models.length > 0"
-          :value="settings.state.model"
-          class="max-w-[140px] truncate rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] tabular-nums text-secondary-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          :title="`Модель: ${settings.state.model} (${ai.models.length} доступно)`"
-          @change="settings.patch({ model: ($event.target as HTMLSelectElement).value })"
+          :model-value="settings.state.model"
+          @update:model-value="settings.patch({ model: String($event) })"
         >
-          <option v-for="m in ai.models" :key="m" :value="m">{{ m }}</option>
-        </select>
+          <SelectTrigger
+            size="sm"
+            class="h-auto max-w-[160px] rounded-full border-border bg-secondary px-2 py-0.5 text-[10px] tabular-nums"
+            :title="`Модель: ${settings.state.model} (${ai.models.length} доступно)`"
+          >
+            <SelectValue placeholder="Модель" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem v-for="m in ai.models" :key="m" :value="m" class="text-xs">{{ m }}</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </SelectRoot>
         <span
           v-else
           class="rounded-full px-2 py-0.5 text-[10px] tabular-nums"
