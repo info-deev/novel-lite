@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
+import { useWorkspaceStore } from '@/stores/workspace';
 import { eventBus, AppEvents } from '@/core/eventBus';
 
 interface Command {
@@ -16,6 +17,7 @@ interface Command {
 const ui = useUiStore();
 const book = useBookStore();
 const settings = useSettingsStore();
+const workspace = useWorkspaceStore();
 const router = useRouter();
 const query = ref('');
 const cursor = ref(0);
@@ -28,6 +30,24 @@ const commands = computed<Command[]>(() => {
     { id: 'nav-settings', label: 'Открыть: Настройки', hint: 'Навигация', run: () => void router.push({ name: 'settings' }) },
     { id: 'toggle-theme', label: 'Переключить тему', hint: 'Интерфейс', run: () => toggleThemeSafe() },
     { id: 'new-scene', label: 'Новая сцена', hint: 'Книга', run: () => addSceneSafe() },
+    {
+      id: 'toggle-ai',
+      label: workspace.aiOpen ? 'Скрыть: AI-ассистент' : 'Показать: AI-ассистент',
+      hint: 'Панели',
+      run: () => workspace.toggleAi(),
+    },
+    {
+      id: 'toggle-codex',
+      label: workspace.codexOpen ? 'Скрыть: Кодекс' : 'Показать: Кодекс',
+      hint: 'Панели',
+      run: () => workspace.toggleCodex(),
+    },
+    {
+      id: 'toggle-right',
+      label: workspace.rightColumnVisible ? 'Скрыть правую панель' : 'Показать правую панель',
+      hint: 'Ctrl+\\',
+      run: () => workspace.toggleRightPanels(),
+    },
   ];
   for (const scene of book.scenes) {
     list.push({

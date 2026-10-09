@@ -4,14 +4,14 @@ import { useRoute } from 'vue-router';
 import AppRail from '@/app/AppRail.vue';
 import AppStructurePanel from '@/app/AppStructurePanel.vue';
 import AppCommandPalette from '@/app/AppCommandPalette.vue';
-import AssistantPanel from '@/features/assistant/AssistantPanel.vue';
-import CodexPanel from '@/features/codex/CodexPanel.vue';
+import AppRightStack from '@/app/AppRightStack.vue';
 import PanelResizeHandle from '@/shared/ui/PanelResizeHandle.vue';
 import BaseButton from '@/shared/ui/BaseButton.vue';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { useSettingsStore } from '@/stores/settings';
 import { useUiStore } from '@/stores/ui';
+import { useWorkspaceStore } from '@/stores/workspace';
 import { eventBus, AppEvents } from '@/core/eventBus';
 
 const route = useRoute();
@@ -19,12 +19,9 @@ const book = useBookStore();
 const codex = useCodexStore();
 const settings = useSettingsStore();
 const ui = useUiStore();
+const workspace = useWorkspaceStore();
 
 const showAssistantStack = computed(() => route.name === 'editor' || route.name === 'board');
-
-function toggleRightTab(): void {
-  settings.patch({ assistantOpen: !settings.state.assistantOpen });
-}
 
 async function loadAll(): Promise<void> {
   await book.load();
@@ -41,6 +38,11 @@ function onKeydown(e: KeyboardEvent): void {
   if (e.key.toLowerCase() === 'k') {
     e.preventDefault();
     ui.togglePalette();
+    return;
+  }
+  if (e.key === '\\') {
+    e.preventDefault();
+    workspace.toggleRightPanels();
     return;
   }
   if (e.altKey) {
@@ -110,10 +112,14 @@ eventBus.on(AppEvents.openScene, (payload) => {
           <button
             v-if="showAssistantStack"
             class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-            :title="settings.state.assistantOpen ? 'Свернуть правую панель' : 'Показать правую панель'"
-            @click="toggleRightTab"
+            :title="
+              workspace.rightColumnVisible
+                ? 'Свернуть правую панель (Ctrl+\\)'
+                : 'Показать правую панель (Ctrl+\\)'
+            "
+            @click="workspace.toggleRightPanels()"
           >
-            {{ settings.state.assistantOpen ? 'Панель ⟩' : 'Панель ⟨' }}
+            {{ workspace.rightColumnVisible ? 'Панель ⟩' : 'Панель ⟨' }}
           </button>
         </div>
       </div>
@@ -126,10 +132,10 @@ eventBus.on(AppEvents.openScene, (payload) => {
       </div>
     </main>
 
-    <!-- Правая панель: AI + Кодекс -->
+    <!-- Правая панель: вертикальный сплит AI + Кодекс -->
     <template v-if="showAssistantStack">
       <PanelResizeHandle
-        v-if="settings.state.assistantOpen"
+        v-if="workspace.rightColumnVisible"
         side="right"
         :width="settings.state.assistantWidth"
         :min="260"
@@ -137,16 +143,11 @@ eventBus.on(AppEvents.openScene, (payload) => {
         @resize="(w: number) => settings.patch({ assistantWidth: w })"
       />
       <aside
-        v-if="settings.state.assistantOpen"
-        class="flex shrink-0 flex-col border-l border-border bg-card"
+        v-if="workspace.rightColumnVisible"
+        class="flex shrink-0 flex-col"
         :style="{ width: `${settings.state.assistantWidth}px` }"
       >
-        <div class="flex min-h-0 flex-[3] flex-col overflow-hidden">
-          <AssistantPanel />
-        </div>
-        <div class="min-h-0 flex-[2] overflow-hidden border-t-2 border-border">
-          <CodexPanel />
-        </div>
+        <AppRightStack />
       </aside>
     </template>
 

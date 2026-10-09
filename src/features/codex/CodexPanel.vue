@@ -52,8 +52,7 @@ type FieldKey = (typeof fields)[number]['key'];
 
 <template>
   <div class="flex h-full min-h-0 flex-col">
-    <header class="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5">
-      <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Кодекс персонажей</h2>
+    <header class="flex shrink-0 items-center justify-end gap-2 border-b border-border px-3 py-2">
       <BaseButton variant="ghost" size="sm" @click="createCharacter()">+ Персонаж</BaseButton>
     </header>
 
