@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import type { BookExport } from '@/core/idb';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
@@ -7,6 +7,7 @@ import { useSettingsStore, type ThemeName } from '@/stores/settings';
 import { useAiStore } from '@/stores/ai';
 import BaseButton from '@/shared/ui/BaseButton.vue';
 import BaseInput from '@/shared/ui/BaseInput.vue';
+import BaseSelect from '@/shared/ui/BaseSelect.vue';
 import BaseTextarea from '@/shared/ui/BaseTextarea.vue';
 
 const settings = useSettingsStore();
@@ -23,6 +24,25 @@ const form = reactive({
   model: settings.state.model,
   systemPrompt: settings.state.prompts.system,
   scenePrompt: settings.state.prompts.sceneContext,
+});
+
+const modelOptions = computed(() => {
+  const opts = ai.models.map((m) => ({ value: m, label: m }));
+  // Сохраняем в списке текущую модель, даже если её нет среди загруженных
+  if (form.model && !opts.some((o) => o.value === form.model)) {
+    opts.unshift({ value: form.model, label: `${form.model} (текущая)` });
+  }
+  return opts;
+});
+
+async function refreshModels(): Promise<void> {
+  settings.patch({ endpoint: form.endpoint.trim() });
+  await ai.loadModels();
+  if (ai.models.length > 0) form.model = settings.state.model;
+}
+
+onMounted(() => {
+  void refreshModels();
 });
 
 function apply(): void {
@@ -172,8 +192,27 @@ function resetDemo(): void {
             {{ health === 'ok' ? 'Соединение установлено' : health === 'fail' ? 'Сервер недоступен' : 'Проверка…' }}
           </span>
         </div>
-        <BaseInput v-model="form.endpoint" label="Endpoint" placeholder="http://localhost:11434" />
-        <BaseInput v-model="form.model" label="Модель" placeholder="llama3.1" />
+        <div class="flex items-end gap-2">
+          <BaseInput v-model="form.endpoint" label="Endpoint" placeholder="http://localhost:11434" class="flex-1" />
+          <BaseButton variant="secondary" size="md" :disabled="ai.modelsLoading" @click="void refreshModels()">
+            {{ ai.modelsLoading ? 'Загрузка…' : '⟳ Обновить' }}
+          </BaseButton>
+        </div>
+        <BaseSelect
+          v-if="modelOptions.length > 0"
+          v-model="form.model"
+          label="Модель"
+          :options="modelOptions"
+          :loading="ai.modelsLoading"
+          hint="Список подтягивается автоматически с сервера Ollama"
+        />
+        <p v-else-if="ai.modelsError" class="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs leading-relaxed text-destructive">
+          ⚠ {{ ai.modelsError }}
+        </p>
+        <BaseInput v-else v-model="form.model" label="Модель" placeholder="llama3.1" />
+        <p v-if="modelOptions.length === 0 && !ai.modelsError" class="-mt-1 text-xs text-muted-foreground">
+          Модели не загружены — укажите название вручную или нажмите «Обновить».
+        </p>
         <BaseTextarea v-model="form.systemPrompt" label="Системный промпт" :rows="4" />
         <BaseTextarea
           v-model="form.scenePrompt"
