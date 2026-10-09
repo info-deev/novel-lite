@@ -4,6 +4,7 @@ import { useAiStore } from '@/stores/ai';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
 import { Button } from '@/shared/ui/components/button';
+import { CopyButton } from '@/shared/ui/components/copy-button';
 import {
   SelectContent,
   SelectGroup,
@@ -109,13 +110,22 @@ onMounted(() => {
         </div>
       </div>
 
-      <div v-for="m in ai.messages" :key="m.id" class="flex flex-col gap-1" :class="m.role === 'user' ? 'items-end' : 'items-start'">
+      <div v-for="m in ai.messages" :key="m.id" class="flex w-full flex-col gap-1" :class="m.role === 'user' ? 'items-end' : 'items-start'">
         <span class="px-1 text-[10px] uppercase tracking-wide text-muted-foreground">{{ m.role === 'user' ? 'Вы' : 'Ассистент' }}</span>
-        <div
-          class="max-w-[92%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-relaxed"
-          :class="m.role === 'user' ? 'bg-primary text-primary-foreground' : 'border border-border bg-card'"
-        >
-          {{ m.content }}<span v-if="m.role === 'assistant' && ai.streaming && m === ai.lastAssistant" class="animate-pulse">▍</span>
+        <!-- Текст сообщения + кнопка копирования в буфер обмена -->
+        <div class="flex w-full items-start gap-1" :class="m.role === 'user' ? 'flex-row-reverse' : 'flex-row'">
+          <CopyButton
+            v-if="m.content && !(m.role === 'assistant' && ai.streaming && m === ai.lastAssistant)"
+            :text="m.content"
+            :title="m.role === 'user' ? 'Скопировать запрос' : 'Скопировать ответ'"
+            class="mt-1.5"
+          />
+          <div
+            class="max-w-[92%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-relaxed"
+            :class="m.role === 'user' ? 'bg-primary text-primary-foreground' : 'border border-border bg-card'"
+          >
+            {{ m.content }}<span v-if="m.role === 'assistant' && ai.streaming && m === ai.lastAssistant" class="animate-pulse">▍</span>
+          </div>
         </div>
       </div>
 
