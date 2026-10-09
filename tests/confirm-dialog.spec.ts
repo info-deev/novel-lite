@@ -36,8 +36,7 @@ describe('confirmDialog', () => {
   });
 
   it('renders in app style and shows message and buttons', async () => {
-    const wrapper = mount(ConfirmDialog, { global: { stubs: { Teleport: true, Transition: false } } });
-    expect(wrapper.find('[role="alertdialog"]').exists()).toBe(false);
+    const wrapper = mount(ConfirmDialog, { attachTo: document.body, global: { stubs: { Transition: false } } });
 
     const promise = confirmDialog({
       title: 'Удалить?',
@@ -46,14 +45,42 @@ describe('confirmDialog', () => {
       danger: true,
     });
     await wrapper.vm.$nextTick();
-    expect(wrapper.text()).toContain('Удалить?');
-    expect(wrapper.text()).toContain('Это действие необратимо.');
-    const buttons = wrapper.findAll('button');
-    expect(buttons.some((b) => b.text() === 'Удалить')).toBe(true);
-    expect(buttons.some((b) => b.text() === 'Отмена')).toBe(true);
+    // Контент диалога рендерится внутри Portal/Teleport — проверяем его в document.
+    expect(document.body.textContent).toContain('Удалить?');
+    expect(document.body.textContent).toContain('Это действие необратимо.');
+    const buttons = Array.from(document.querySelectorAll('button'));
+    expect(buttons.some((b) => b.textContent?.trim() === 'Удалить')).toBe(true);
+    expect(buttons.some((b) => b.textContent?.trim() === 'Отмена')).toBe(true);
 
     rejectConfirm();
     await expect(promise).resolves.toBe(false);
+    wrapper.unmount();
+  });
+
+  it('confirm button resolves true and cancel button resolves false', async () => {
+    const wrapper = mount(ConfirmDialog, { attachTo: document.body, global: { stubs: { Transition: false } } });
+
+    // Подтверждение кликом по кнопке
+    const pConfirm = confirmDialog({ title: 'Сделать?', confirmText: 'Сделать' });
+    await wrapper.vm.$nextTick();
+    const confirmBtn = Array.from(document.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Сделать',
+    );
+    expect(confirmBtn).toBeDefined();
+    confirmBtn!.click();
+    await expect(pConfirm).resolves.toBe(true);
+
+    // Отмена кликом по кнопке
+    const pCancel = confirmDialog({ title: 'Сделать?' });
+    await wrapper.vm.$nextTick();
+    const cancelBtn = Array.from(document.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Отмена',
+    );
+    expect(cancelBtn).toBeDefined();
+    cancelBtn!.click();
+    await expect(pCancel).resolves.toBe(false);
+
+    wrapper.unmount();
   });
 
   it('book.requestDeleteScene deletes the scene only after confirmation', async () => {
