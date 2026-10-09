@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import type { HTMLAttributes } from 'vue';
+import { Label, type LabelProps } from 'reka-ui';
+import { cn } from '@/shared/ui/lib/utils';
+
+const props = defineProps<LabelProps & { class?: HTMLAttributes['class'] }>();
+</script>
+
+<template>
+  <Label
+    data-slot="label"
+    v-bind="props"
+    :class="cn('text-xs font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70', props.class)"
+  >
+    <slot />
+  </Label>
+</template>
