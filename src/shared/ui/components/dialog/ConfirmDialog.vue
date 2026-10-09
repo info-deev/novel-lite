@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { cn } from '@/shared/ui/lib/utils';
 import {
-  DialogContent,
+  ConfirmDialogContent,
   DialogDescription,
   DialogRoot,
   DialogTitle,
@@ -14,7 +14,6 @@ import {
   useConfirmState,
 } from '@/shared/ui/dialogProvider';
 
-const TITLE_ID = 'confirm-dialog-title';
 const { state } = useConfirmState();
 
 const isOpen = computed({
@@ -40,14 +39,17 @@ function onCancel(): void {
 
 <template>
   <DialogRoot v-model:open="isOpen">
-    <DialogContent
+    <!--
+      ConfirmDialogContent берёт на себя aria-labelledby: id заголовка
+      берётся из внутреннего контекста reka-ui, что убирает warning доступности.
+    -->
+    <ConfirmDialogContent
       role="alertdialog"
-      :aria-labelledby="TITLE_ID"
       max-width="max-w-sm"
       :class="cn('p-0')"
     >
       <div v-if="state" class="p-5">
-        <DialogTitle :id="TITLE_ID">{{ state.title }}</DialogTitle>
+        <DialogTitle>{{ state.title }}</DialogTitle>
         <DialogDescription
           v-if="state.message"
           class="mt-2 text-sm leading-relaxed"
@@ -68,6 +70,6 @@ function onCancel(): void {
           </Button>
         </div>
       </div>
-    </DialogContent>
+    </ConfirmDialogContent>
   </DialogRoot>
 </template>
