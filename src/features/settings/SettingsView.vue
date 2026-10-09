@@ -9,6 +9,7 @@ import BaseButton from '@/shared/ui/BaseButton.vue';
 import BaseInput from '@/shared/ui/BaseInput.vue';
 import BaseSelect from '@/shared/ui/BaseSelect.vue';
 import BaseTextarea from '@/shared/ui/BaseTextarea.vue';
+import { confirmDialog } from '@/shared/ui/dialogProvider';
 
 const settings = useSettingsStore();
 const book = useBookStore();
@@ -119,8 +120,14 @@ async function importJson(e: Event): Promise<void> {
   }
 }
 
-function resetDemo(): void {
-  if (window.confirm('Сбросить книгу и создать демо-данные заново? Текущие данные будут удалены.')) {
+async function resetDemo(): Promise<void> {
+  const ok = await confirmDialog({
+    title: 'Сбросить книгу?',
+    message: 'Демо-данные будут созданы заново. Текущие данные будут удалены.',
+    confirmText: 'Сбросить',
+    danger: true,
+  });
+  if (ok) {
     void book.resetToDemo();
     void codex.load();
   }

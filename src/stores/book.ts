@@ -4,6 +4,7 @@ import type { Act, BookMeta, Scene } from '@/core/types';
 import { countWords, uid } from '@/core/types';
 import { idb } from '@/core/idb';
 import { createDemoData } from '@/core/demo';
+import { confirmDialog } from '@/shared/ui/dialogProvider';
 
 export const useBookStore = defineStore('book', () => {
   const book = ref<BookMeta | null>(null);
@@ -152,13 +153,17 @@ export const useBookStore = defineStore('book', () => {
     void idb.deleteScene(id);
   }
 
-  function requestDeleteScene(id: string): void {
+  async function requestDeleteScene(id: string): Promise<void> {
     const scene = scenes.value.find((s) => s.id === id);
     if (!scene) return;
     const words = scene.wordCount > 0 ? ` (${scene.wordCount} сл.)` : '';
-    if (window.confirm(`Удалить сцену «${scene.title || 'Без названия'}»${words}? Это действие необратимо.`)) {
-      deleteScene(id);
-    }
+    const ok = await confirmDialog({
+      title: 'Удалить сцену?',
+      message: `Сцена «${scene.title || 'Без названия'}»${words} будет удалена. Это действие необратимо.`,
+      confirmText: 'Удалить',
+      danger: true,
+    });
+    if (ok) deleteScene(id);
   }
 
   function moveScene(id: string, targetActId: string, targetIndex: number): void {

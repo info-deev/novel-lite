@@ -7,6 +7,7 @@ import AppCommandPalette from '@/app/AppCommandPalette.vue';
 import AppRightStack from '@/app/AppRightStack.vue';
 import PanelResizeHandle from '@/shared/ui/PanelResizeHandle.vue';
 import BaseButton from '@/shared/ui/BaseButton.vue';
+import ConfirmDialog from '@/shared/ui/ConfirmDialog.vue';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { useSettingsStore } from '@/stores/settings';
@@ -152,5 +153,6 @@ eventBus.on(AppEvents.openScene, (payload) => {
     </template>
 
     <AppCommandPalette />
+    <ConfirmDialog />
   </div>
 </template>
