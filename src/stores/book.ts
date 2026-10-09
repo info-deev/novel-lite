@@ -110,9 +110,25 @@ export const useBookStore = defineStore('book', () => {
   }
 
   function deleteScene(id: string): void {
+    const idx = scenes.value.findIndex((s) => s.id === id);
+    if (idx < 0) return;
+    const wasActive = activeSceneId.value === id;
     scenes.value = scenes.value.filter((s) => s.id !== id);
-    if (activeSceneId.value === id) activeSceneId.value = scenes.value[0]?.id ?? null;
+    if (wasActive) {
+      const next = scenes.value[Math.min(idx, scenes.value.length - 1)] ?? null;
+      setActiveScene(next?.id ?? null);
+    }
+    dirtySceneIds.value.delete(id);
     void idb.deleteScene(id);
+  }
+
+  function requestDeleteScene(id: string): void {
+    const scene = scenes.value.find((s) => s.id === id);
+    if (!scene) return;
+    const words = scene.wordCount > 0 ? ` (${scene.wordCount} сл.)` : '';
+    if (window.confirm(`Удалить сцену «${scene.title || 'Без названия'}»${words}? Это действие необратимо.`)) {
+      deleteScene(id);
+    }
   }
 
   function moveScene(id: string, targetActId: string, targetIndex: number): void {
@@ -210,6 +226,7 @@ export const useBookStore = defineStore('book', () => {
     updateScene,
     addScene,
     deleteScene,
+    requestDeleteScene,
     moveScene,
     addAct,
     updateAct,
