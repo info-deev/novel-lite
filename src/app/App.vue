@@ -5,9 +5,9 @@ import AppRail from '@/app/AppRail.vue';
 import AppStructurePanel from '@/app/AppStructurePanel.vue';
 import AppCommandPalette from '@/app/AppCommandPalette.vue';
 import AppRightStack from '@/app/AppRightStack.vue';
-import PanelResizeHandle from '@/shared/ui/PanelResizeHandle.vue';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import ConfirmDialog from '@/shared/ui/ConfirmDialog.vue';
+import { PanelResizeHandle } from '@/shared/ui/components/resize-handle';
+import { Button } from '@/shared/ui/components/button';
+import { ConfirmDialog } from '@/shared/ui/components/dialog';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { useSettingsStore } from '@/stores/settings';
@@ -107,9 +107,9 @@ eventBus.on(AppEvents.openScene, (payload) => {
           <span class="truncate font-serif">{{ book.book?.title ?? 'Lite Novelcrafter' }}</span>
         </button>
         <div class="flex items-center gap-2">
-          <BaseButton variant="ghost" size="sm" title="Командная палитра (Ctrl+K)" @click="ui.openPalette()">
+          <Button variant="ghost" size="sm" title="Командная палитра (Ctrl+K)" @click="ui.openPalette()">
             ⌘K
-          </BaseButton>
+          </Button>
           <button
             v-if="showAssistantStack"
             class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"

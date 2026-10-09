@@ -2,8 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AssistantPanel from "@/features/assistant/AssistantPanel.vue";
 import CodexPanel from "@/features/codex/CodexPanel.vue";
-import VerticalResizeHandle from "@/shared/ui/VerticalResizeHandle.vue";
-import BaseButton from "@/shared/ui/BaseButton.vue";
+import { VerticalResizeHandle } from '@/shared/ui/components/resize-handle';
+import { Button } from '@/shared/ui/components/button';
 import { useWorkspaceStore } from "@/stores/workspace";
 
 const workspace = useWorkspaceStore();
@@ -78,7 +78,7 @@ function onAiResize(px: number): void {
             >
               ✦ AI-ассистент
             </span>
-            <BaseButton
+            <Button
               variant="ghost"
               size="sm"
               class="h-5 w-6 px-0 text-xs text-muted-foreground hover:text-foreground"
@@ -87,7 +87,7 @@ function onAiResize(px: number): void {
               @click="workspace.toggleAi()"
             >
               ✕
-            </BaseButton>
+            </Button>
           </header>
           <div class="min-h-0 flex-1 overflow-hidden">
             <AssistantPanel />
@@ -124,7 +124,7 @@ function onAiResize(px: number): void {
             >
               ◆ Кодекс
             </span>
-            <BaseButton
+            <Button
               variant="ghost"
               size="sm"
               class="h-5 w-6 px-0 text-xs text-muted-foreground hover:text-foreground"
@@ -133,7 +133,7 @@ function onAiResize(px: number): void {
               @click="workspace.toggleCodex()"
             >
               ✕
-            </BaseButton>
+            </Button>
           </header>
           <div class="min-h-0 flex-1 overflow-hidden">
             <CodexPanel />
@@ -148,15 +148,15 @@ function onAiResize(px: number): void {
       class="flex min-h-0 flex-1 flex-col items-stretch gap-2 p-3"
     >
       <p class="mb-1 text-xs text-muted-foreground">Обе панели скрыты.</p>
-      <BaseButton variant="outline" size="sm" @click="workspace.openAll()">
+      <Button variant="outline" size="sm" @click="workspace.openAll()">
         ✦ Показать AI и Кодекс
-      </BaseButton>
+      </Button>
     </div>
     <div
       v-else-if="!workspace.aiOpen || !workspace.codexOpen"
       class="flex shrink-0 items-center justify-center gap-2 border-t border-border bg-background/20 py-1.5"
     >
-      <BaseButton
+      <Button
         v-if="!workspace.aiOpen"
         variant="ghost"
         size="sm"
@@ -164,8 +164,8 @@ function onAiResize(px: number): void {
         @click="workspace.toggleAi()"
       >
         ✦ AI
-      </BaseButton>
-      <BaseButton
+      </Button>
+      <Button
         v-if="!workspace.codexOpen"
         variant="ghost"
         size="sm"
@@ -173,7 +173,7 @@ function onAiResize(px: number): void {
         @click="workspace.toggleCodex()"
       >
         ◆ Кодекс
-      </BaseButton>
+      </Button>
     </div>
   </div>
 </template>

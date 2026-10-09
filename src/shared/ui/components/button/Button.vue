@@ -6,6 +6,7 @@ import { cn } from '@/shared/ui/lib/utils';
 import { buttonVariants, type ButtonVariants } from '.';
 
 interface Props {
+  type?: 'button' | 'submit' | 'reset';
   variant?: ButtonVariants['variant'];
   size?: ButtonVariants['size'];
   active?: boolean;

@@ -3,8 +3,8 @@ import { computed } from 'vue';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
 import { STATUS_LABELS, type Scene } from '@/core/types';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import EmptyState from '@/shared/ui/EmptyState.vue';
+import { Button } from '@/shared/ui/components/button';
+import { EmptyState } from '@/shared/ui/components/empty-state';
 
 const book = useBookStore();
 const settings = useSettingsStore();
@@ -42,7 +42,7 @@ function statusDot(scene: Scene): string {
     <div class="flex items-center justify-between px-3 pb-1 pt-3">
       <h2 class="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">Структура</h2>
       <div class="flex gap-1">
-        <BaseButton variant="ghost" size="sm" title="Новый акт" @click="book.addAct()">+ Акт</BaseButton>
+        <Button variant="ghost" size="sm" title="Новый акт" @click="book.addAct()">+ Акт</Button>
       </div>
     </div>
 
@@ -88,9 +88,9 @@ function statusDot(scene: Scene): string {
     </div>
 
     <div class="border-t border-border p-2">
-      <BaseButton variant="outline" size="sm" classes="w-full" @click="book.addScene(book.sortedActs[0]?.id ?? '')">
+      <Button variant="outline" size="sm" class="w-full" @click="book.addScene(book.sortedActs[0]?.id ?? '')">
         + Новая сцена
-      </BaseButton>
+      </Button>
     </div>
   </aside>
 </template>

@@ -3,8 +3,8 @@ import { reactive } from 'vue';
 import { useBookStore } from '@/stores/book';
 import { useRouter } from 'vue-router';
 import { STATUS_LABELS, SCENE_STATUSES, type Scene, type SceneStatus } from '@/core/types';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import EmptyState from '@/shared/ui/EmptyState.vue';
+import { Button } from '@/shared/ui/components/button';
+import { EmptyState } from '@/shared/ui/components/empty-state';
 
 const book = useBookStore();
 const router = useRouter();
@@ -80,7 +80,7 @@ function addSceneTo(actId: string): void {
   <div class="flex h-full min-h-0 flex-col">
     <header class="flex shrink-0 items-center justify-between border-b border-border bg-card/60 px-4 py-2">
       <h1 class="font-serif text-base font-semibold">Канбан-доска сцен</h1>
-      <BaseButton variant="primary" size="sm" @click="book.addAct()">+ Новый акт</BaseButton>
+      <Button variant="primary" size="sm" @click="book.addAct()">+ Новый акт</Button>
     </header>
 
     <div v-if="book.sortedActs.length === 0" class="flex-1">
@@ -110,8 +110,8 @@ function addSceneTo(actId: string): void {
                 {{ (book.scenesByAct.get(act.id) ?? []).length }} сцен
               </span>
               <div class="flex gap-1">
-                <BaseButton variant="ghost" size="sm" class="h-6 px-1.5 text-xs" @click="addSceneTo(act.id)">+ сцена</BaseButton>
-                <BaseButton variant="ghost" size="sm" class="h-6 px-1.5 text-xs text-destructive" @click="book.deleteAct(act.id)">✕</BaseButton>
+                <Button variant="ghost" size="sm" class="h-6 px-1.5 text-xs" @click="addSceneTo(act.id)">+ сцена</Button>
+                <Button variant="ghost" size="sm" class="h-6 px-1.5 text-xs text-destructive" @click="book.deleteAct(act.id)">✕</Button>
               </div>
             </div>
           </div>

@@ -2,8 +2,8 @@
 import { computed, nextTick, ref } from 'vue';
 import { useCodexStore } from '@/stores/codex';
 import type { Character } from '@/core/types';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import EmptyState from '@/shared/ui/EmptyState.vue';
+import { Button } from '@/shared/ui/components/button';
+import { EmptyState } from '@/shared/ui/components/empty-state';
 import { confirmDialog } from '@/shared/ui/dialogProvider';
 
 const codex = useCodexStore();
@@ -59,7 +59,7 @@ type FieldKey = (typeof fields)[number]['key'];
 <template>
   <div class="flex h-full min-h-0 flex-col">
     <header class="flex shrink-0 items-center justify-end gap-2 border-b border-border px-3 py-2">
-      <BaseButton variant="ghost" size="sm" @click="createCharacter()">+ Персонаж</BaseButton>
+      <Button variant="ghost" size="sm" @click="createCharacter()">+ Персонаж</Button>
     </header>
 
     <div class="shrink-0 p-2 pb-1">
@@ -110,7 +110,7 @@ type FieldKey = (typeof fields)[number]['key'];
           title="Цвет персонажа"
           @input="update({ color: ($event.target as HTMLInputElement).value })"
         />
-        <BaseButton variant="ghost" size="icon" class="h-7 w-7 text-destructive" title="Удалить" @click="removeActive()">✕</BaseButton>
+        <Button variant="ghost" size="icon" class="h-7 w-7 text-destructive" title="Удалить" @click="removeActive()">✕</Button>
       </div>
 
       <div class="space-y-2.5">
@@ -134,7 +134,7 @@ type FieldKey = (typeof fields)[number]['key'];
     </div>
 
     <EmptyState v-else title="Персонаж не выбран" hint="Создайте персонажа — имя, роль, характер и арка будут под рукой при работе над сценами.">
-      <BaseButton variant="primary" size="sm" @click="createCharacter()">Создать первого персонажа</BaseButton>
+      <Button variant="primary" size="sm" @click="createCharacter()">Создать первого персонажа</Button>
     </EmptyState>
   </div>
 </template>
