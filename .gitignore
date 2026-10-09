@@ -1,1 +1,10 @@
-(empty)
+# Специфичные файлы для веб-контейнера Qwen Coder
+.qwen/
+.agent/
+gha-creds-*.json
+workspace.json
+
+# Ваши стандартные исключения (например)
+node_modules/
+.env
+dist/
