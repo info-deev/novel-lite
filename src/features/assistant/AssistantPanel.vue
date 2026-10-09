@@ -41,8 +41,7 @@ onMounted(() => {
 
 <template>
   <div class="flex h-full min-h-0 flex-col">
-    <header class="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5">
-      <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI-ассистент</h2>
+    <header class="flex shrink-0 items-center justify-end gap-1 border-b border-border px-3 py-2">
       <div class="flex items-center gap-1">
         <select
           v-if="ai.models.length > 0"
