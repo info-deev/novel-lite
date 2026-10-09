@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import AssistantPanel from '@/features/assistant/AssistantPanel.vue';
-import CodexPanel from '@/features/codex/CodexPanel.vue';
-import VerticalResizeHandle from '@/shared/ui/VerticalResizeHandle.vue';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import { useWorkspaceStore } from '@/stores/workspace';
+import { computed, onBeforeUnmount, ref, watch } from "vue";
+import AssistantPanel from "@/features/assistant/AssistantPanel.vue";
+import CodexPanel from "@/features/codex/CodexPanel.vue";
+import VerticalResizeHandle from "@/shared/ui/VerticalResizeHandle.vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
+import { useWorkspaceStore } from "@/stores/workspace";
 
 const workspace = useWorkspaceStore();
 
@@ -32,9 +32,13 @@ onBeforeUnmount(() => {
 
 /** Мин/макс высоты AI-панели в px с учётом текущей высоты колонки. */
 const aiMinPx = computed(() => Math.max(120, stackHeight.value * 0.2));
-const aiMaxPx = computed(() => Math.max(aiMinPx.value, stackHeight.value * 0.8));
+const aiMaxPx = computed(() =>
+  Math.max(aiMinPx.value, stackHeight.value * 0.8),
+);
 
-const aiHeightPx = computed(() => (stackHeight.value * workspace.aiFlexPct) / 100);
+const aiHeightPx = computed(
+  () => (stackHeight.value * workspace.aiFlexPct) / 100,
+);
 
 function onAiResize(px: number): void {
   if (stackHeight.value <= 0) return;
@@ -44,9 +48,16 @@ function onAiResize(px: number): void {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-col border-l border-border bg-card" @mousedown.capture="measure">
+  <div
+    class="flex h-full min-h-0 flex-col border-l border-border bg-card"
+    @mousedown.capture="measure"
+  >
     <!-- Стек панелей: AI сверху, Кодекс снизу -->
-    <div v-if="workspace.rightColumnVisible" ref="stackRef" class="flex min-h-0 flex-1 flex-col">
+    <div
+      v-if="workspace.rightColumnVisible"
+      ref="stackRef"
+      class="flex min-h-0 flex-1 flex-col"
+    >
       <!-- AI АССИСТЕНТ -->
       <section
         v-if="workspace.aiOpen"
@@ -62,7 +73,9 @@ function onAiResize(px: number): void {
           <header
             class="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-background/30 px-3 py-1.5"
           >
-            <span class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span
+              class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               ✦ AI-ассистент
             </span>
             <BaseButton
@@ -106,7 +119,9 @@ function onAiResize(px: number): void {
           <header
             class="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-background/30 px-3 py-1.5"
           >
-            <span class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span
+              class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               ◆ Кодекс
             </span>
             <BaseButton
