@@ -3,7 +3,7 @@ import { nextTick, onMounted, ref, watch } from 'vue';
 import { useAiStore } from '@/stores/ai';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
-import BaseButton from '@/shared/ui/BaseButton.vue';
+import { Button } from '@/shared/ui/components/button';
 
 const ai = useAiStore();
 const book = useBookStore();
@@ -60,7 +60,7 @@ onMounted(() => {
         >
           {{ settings.state.model }}
         </span>
-        <BaseButton variant="ghost" size="sm" class="h-6 px-1.5 text-xs" title="Очистить историю" @click="ai.clear()">⌫</BaseButton>
+        <Button variant="ghost" size="sm" class="h-6 px-1.5 text-xs" title="Очистить историю" @click="ai.clear()">⌫</Button>
       </div>
     </header>
 
@@ -117,8 +117,8 @@ onMounted(() => {
           class="min-h-[38px] flex-1 resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60"
           @keydown.enter.exact.prevent="void submit()"
         ></textarea>
-        <BaseButton v-if="ai.streaming" variant="destructive" size="md" @click="ai.stop()">■</BaseButton>
-        <BaseButton v-else variant="primary" size="md" :disabled="!input.trim()" @click="void submit()">➤</BaseButton>
+        <Button v-if="ai.streaming" variant="destructive" size="md" @click="ai.stop()">■</Button>
+        <Button v-else variant="primary" size="md" :disabled="!input.trim()" @click="void submit()">➤</Button>
       </div>
     </div>
   </div>

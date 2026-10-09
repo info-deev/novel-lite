@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import BaseButton from '@/shared/ui/BaseButton.vue';
+import { Button } from '@/shared/ui/components/button';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,7 +17,7 @@ const items = [
     <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-base font-bold text-primary-foreground shadow-sm" title="Lite Novelcrafter">
       ✒
     </div>
-    <BaseButton
+    <Button
       v-for="item in items"
       :key="item.name"
       variant="ghost"
@@ -28,7 +28,7 @@ const items = [
       @click="void router.push({ name: item.name })"
     >
       {{ item.icon }}
-    </BaseButton>
+    </Button>
     <div class="mt-auto flex flex-col items-center gap-1 text-[10px] text-muted-foreground">
       <span title="Локальное приложение">◉</span>
     </div>

@@ -5,10 +5,18 @@ import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { useSettingsStore, type ThemeName } from '@/stores/settings';
 import { useAiStore } from '@/stores/ai';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import BaseInput from '@/shared/ui/BaseInput.vue';
-import BaseSelect from '@/shared/ui/BaseSelect.vue';
-import BaseTextarea from '@/shared/ui/BaseTextarea.vue';
+import { Button } from '@/shared/ui/components/button';
+import { FormField } from '@/shared/ui/components/field';
+import { Input } from '@/shared/ui/components/input';
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/components/select';
+import { Textarea } from '@/shared/ui/components/textarea';
 import { confirmDialog } from '@/shared/ui/dialogProvider';
 
 const settings = useSettingsStore();
@@ -149,32 +157,22 @@ async function resetDemo(): Promise<void> {
       <!-- О книге -->
       <section class="space-y-3 rounded-xl border border-border bg-card p-4">
         <h2 class="text-sm font-semibold">О книге</h2>
-        <BaseInput
-          :model-value="book.book?.title ?? ''"
-          label="Название"
-          placeholder="Название романа"
-          @update:model-value="onBookTitle"
-        />
-        <BaseInput
-          :model-value="book.book?.author ?? ''"
-          label="Автор"
-          placeholder="Имя автора"
-          @update:model-value="onBookAuthor"
-        />
-        <BaseTextarea
-          :model-value="book.book?.synopsis ?? ''"
-          label="Синопсис"
-          :rows="3"
-          placeholder="О чём эта книга?"
-          @update:model-value="onBookSynopsis"
-        />
+        <FormField v-slot="{ id }" label="Название">
+          <Input :id="id" :model-value="book.book?.title ?? ''" placeholder="Название романа" @update:model-value="onBookTitle" />
+        </FormField>
+        <FormField label="Автор">
+          <Input :model-value="book.book?.author ?? ''" placeholder="Имя автора" @update:model-value="onBookAuthor" />
+        </FormField>
+        <FormField label="Синопсис">
+          <Textarea :model-value="book.book?.synopsis ?? ''" :rows="3" placeholder="О чём эта книга?" @update:model-value="onBookSynopsis" />
+        </FormField>
       </section>
 
       <!-- Внешний вид -->
       <section class="space-y-3 rounded-xl border border-border bg-card p-4">
         <h2 class="text-sm font-semibold">Внешний вид</h2>
         <div class="flex gap-2">
-          <BaseButton
+          <Button
             v-for="t in (['dark', 'light'] as ThemeName[])"
             :key="t"
             :variant="settings.state.theme === t ? 'primary' : 'outline'"
@@ -182,7 +180,7 @@ async function resetDemo(): Promise<void> {
             @click="setTheme(t)"
           >
             {{ t === 'dark' ? '🌙 Тёмная' : '☀️ Светлая' }}
-          </BaseButton>
+          </Button>
         </div>
         <p class="text-xs text-muted-foreground">Тема сохраняется автоматически.</p>
       </section>
@@ -201,9 +199,9 @@ async function resetDemo(): Promise<void> {
         </div>
         <div class="flex items-end gap-2">
           <BaseInput v-model="form.endpoint" label="Endpoint" placeholder="http://localhost:11434" class="flex-1" />
-          <BaseButton variant="secondary" size="md" :disabled="ai.modelsLoading" @click="void refreshModels()">
+          <Button variant="secondary" size="md" :disabled="ai.modelsLoading" @click="void refreshModels()">
             {{ ai.modelsLoading ? 'Загрузка…' : '⟳ Обновить' }}
-          </BaseButton>
+          </Button>
         </div>
         <BaseSelect
           v-if="modelOptions.length > 0"
@@ -228,9 +226,9 @@ async function resetDemo(): Promise<void> {
           hint="Доступные переменные: {title}, {synopsis}, {content}"
         />
         <div class="flex flex-wrap gap-2 pt-1">
-          <BaseButton variant="primary" size="sm" @click="apply">Сохранить</BaseButton>
-          <BaseButton variant="secondary" size="sm" @click="checkConnection">Проверить соединение</BaseButton>
-          <BaseButton variant="ghost" size="sm" @click="resetPrompts">Сбросить промпты</BaseButton>
+          <Button variant="primary" size="sm" @click="apply">Сохранить</Button>
+          <Button variant="secondary" size="sm" @click="checkConnection">Проверить соединение</Button>
+          <Button variant="ghost" size="sm" @click="resetPrompts">Сбросить промпты</Button>
           <span v-if="saved" class="self-center text-xs text-emerald-500">✓ Настройки сохранены</span>
         </div>
       </section>
@@ -243,10 +241,10 @@ async function resetDemo(): Promise<void> {
           персонажей: {{ codex.characters.length }} · слов: {{ book.totalWords.toLocaleString('ru') }}
         </p>
         <div class="flex flex-wrap gap-2">
-          <BaseButton variant="secondary" size="sm" @click="void exportJson()">⬇ Экспорт JSON</BaseButton>
-          <BaseButton variant="secondary" size="sm" @click="fileInput?.click()">⬆ Импорт JSON</BaseButton>
+          <Button variant="secondary" size="sm" @click="void exportJson()">⬇ Экспорт JSON</Button>
+          <Button variant="secondary" size="sm" @click="fileInput?.click()">⬆ Импорт JSON</Button>
           <input ref="fileInput" type="file" accept="application/json,.json" class="hidden" @change="importJson" />
-          <BaseButton variant="destructive" size="sm" @click="resetDemo">Сбросить к демо</BaseButton>
+          <Button variant="destructive" size="sm" @click="resetDemo">Сбросить к демо</Button>
         </div>
       </section>
 

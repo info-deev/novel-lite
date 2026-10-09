@@ -7,8 +7,8 @@ import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { eventBus, AppEvents } from '@/core/eventBus';
 import { STATUS_LABELS, SCENE_STATUSES, type SceneStatus } from '@/core/types';
-import BaseButton from '@/shared/ui/BaseButton.vue';
-import EmptyState from '@/shared/ui/EmptyState.vue';
+import { Button } from '@/shared/ui/components/button';
+import { EmptyState } from '@/shared/ui/components/empty-state';
 
 const book = useBookStore();
 const codex = useCodexStore();
@@ -133,9 +133,9 @@ function setStatus(status: SceneStatus): void {
   <div v-if="scene" class="flex h-full min-h-0 flex-col">
     <!-- Заголовок сцены -->
     <header class="flex shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card/60 px-4 py-2">
-      <BaseButton variant="ghost" size="sm" :active="showMeta" @click="showMeta = !showMeta" title="Название и синопсис">
+      <Button variant="ghost" size="sm" :active="showMeta" @click="showMeta = !showMeta" title="Название и синопсис">
         ☰
-      </BaseButton>
+      </Button>
       <input
         :value="scene.title"
         class="min-w-32 flex-1 rounded-md bg-transparent px-2 py-1 font-serif text-lg font-semibold outline-none hover:bg-accent/30 focus:bg-accent/40"
@@ -157,9 +157,9 @@ function setStatus(status: SceneStatus): void {
         <span class="h-1.5 w-1.5 rounded-full" :class="book.saveState === 'saving' ? 'animate-pulse bg-amber-400' : 'bg-emerald-500'"></span>
         {{ book.saveState === 'saving' ? 'Сохраняю…' : savedAt ? `Сохранено ${savedAt}` : 'Сохранено' }}
       </span>
-      <BaseButton variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Удалить сцену" @click="book.requestDeleteScene(scene.id)">
+      <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Удалить сцену" @click="book.requestDeleteScene(scene.id)">
         ✕
-      </BaseButton>
+      </Button>
     </header>
 
     <!-- Мета-панель -->
@@ -204,7 +204,7 @@ function setStatus(status: SceneStatus): void {
           { label: '1.', cmd: 'toggleOrderedList', active: editor.isActive('orderedList'), cls: '' },
         ] as const" :key="btn.cmd"
       >
-        <BaseButton
+        <Button
           variant="ghost"
           size="icon"
           :active="btn.active"
@@ -219,18 +219,18 @@ function setStatus(status: SceneStatus): void {
           "
         >
           {{ btn.label }}
-        </BaseButton>
+        </Button>
       </template>
       <span class="mx-1 h-5 w-px bg-border"></span>
-      <BaseButton variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Горизонтальная линия" @click="editor.chain().focus().setHorizontalRule().run()">
+      <Button variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Горизонтальная линия" @click="editor.chain().focus().setHorizontalRule().run()">
         ―
-      </BaseButton>
-      <BaseButton variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Отменить" :disabled="!editor.can().undo()" @click="editor.chain().focus().undo().run()">
+      </Button>
+      <Button variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Отменить" :disabled="!editor.can().undo()" @click="editor.chain().focus().undo().run()">
         ↺
-      </BaseButton>
-      <BaseButton variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Повторить" :disabled="!editor.can().redo()" @click="editor.chain().focus().redo().run()">
+      </Button>
+      <Button variant="ghost" size="icon" class="h-7 w-7 text-xs" title="Повторить" :disabled="!editor.can().redo()" @click="editor.chain().focus().redo().run()">
         ↻
-      </BaseButton>
+      </Button>
     </div>
 
     <!-- Сам редактор -->
@@ -242,6 +242,6 @@ function setStatus(status: SceneStatus): void {
   </div>
 
   <EmptyState v-else title="Сцена не выбрана" hint="Выберите сцену слева в структуре книги или создайте новую." class="h-full">
-    <BaseButton variant="primary" size="sm" @click="book.addScene(book.sortedActs[0]?.id ?? '')">+ Новая сцена</BaseButton>
+    <Button variant="primary" size="sm" @click="book.addScene(book.sortedActs[0]?.id ?? '')">+ Новая сцена</Button>
   </EmptyState>
 </template>
