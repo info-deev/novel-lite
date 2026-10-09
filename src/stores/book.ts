@@ -72,6 +72,10 @@ export const useBookStore = defineStore('book', () => {
 
   function setActiveScene(id: string | null): void {
     activeSceneId.value = id;
+    if (typeof localStorage !== 'undefined') {
+      if (id) localStorage.setItem('lite-novelcrafter.active-scene', id);
+      else localStorage.removeItem('lite-novelcrafter.active-scene');
+    }
   }
 
   function updateScene(id: string, patch: Partial<Omit<Scene, 'id'>>): void {

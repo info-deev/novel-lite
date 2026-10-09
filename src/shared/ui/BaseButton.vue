@@ -32,7 +32,7 @@ const styles = computed(() => {
 </script>
 
 <template>
-  <button :class="styles" type="button">
+  <button :class="styles" type="button" v-bind="$attrs">
     <slot />
   </button>
 </template>

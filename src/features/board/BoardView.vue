@@ -122,7 +122,10 @@ function addSceneTo(actId: string): void {
               :key="scene.id"
               draggable="true"
               class="group cursor-grab rounded-lg border border-border bg-card p-2.5 shadow-sm transition-all hover:border-primary/40 active:cursor-grabbing"
-              :class="drag.sceneId === scene.id ? 'opacity-40' : '', drag.overAct === act.id && drag.overIndex === i ? 'ring-2 ring-primary/50' : ''"
+              :class="[
+                drag.sceneId === scene.id ? 'opacity-40' : '',
+                drag.overAct === act.id && drag.overIndex === i ? 'ring-2 ring-primary/50' : '',
+              ]"
               @dragstart="onDragStart(scene, $event)"
               @dragend="resetDrag()"
               @dragover="onDragOverCard(i, $event)"

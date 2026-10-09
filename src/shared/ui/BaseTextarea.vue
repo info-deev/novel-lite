@@ -1,10 +1,11 @@
 <script setup lang="ts">
 const model = defineModel<string>({ required: true });
 
-withDefaults(defineProps<{ label?: string; placeholder?: string; rows?: number }>(), {
+withDefaults(defineProps<{ label?: string; placeholder?: string; rows?: number; hint?: string }>(), {
   label: undefined,
   placeholder: '',
   rows: 3,
+  hint: undefined,
 });
 
 const classes =
@@ -15,5 +16,6 @@ const classes =
   <div class="w-full space-y-1.5">
     <label v-if="label" class="text-xs font-medium text-muted-foreground">{{ label }}</label>
     <textarea v-model="model" :rows="rows" :placeholder="placeholder" :class="classes" />
+    <p v-if="hint" class="text-[11px] text-muted-foreground">{{ hint }}</p>
   </div>
 </template>

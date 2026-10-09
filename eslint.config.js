@@ -1,18 +1,26 @@
-import js from 'globals';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**'] },
-  js.configs.recommended,
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
   {
-    files: ['**/*.vue'],
+    files: ['**/*.{ts,vue}'],
     languageOptions: {
       parserOptions: {
         parser: tseslint.parser,
+        ecmaVersion: 2022,
+        sourceType: 'module',
       },
+      globals: { ...globals.browser, ...globals.es2022 },
+    },
+  },
+  {
+    files: ['*.config.ts', 'vite.config.ts', 'vitest.config.ts', 'tests/**/*.ts'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.es2022 },
     },
   },
   {

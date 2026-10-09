@@ -121,16 +121,18 @@ function setStatus(status: SceneStatus): void {
 
     <!-- Тулбар -->
     <div v-if="editor" class="flex shrink-0 items-center gap-0.5 border-b border-border bg-card/60 px-3 py-1.5 text-sm">
-      <template v-for="btn in [
-        { label: 'B', cmd: 'toggleBold', active: editor.isActive('bold'), cls: 'font-bold' },
-        { label: 'I', cmd: 'toggleItalic', active: editor.isActive('italic'), cls: 'italic' },
-        { label: 'S', cmd: 'toggleStrike', active: editor.isActive('strike'), cls: 'line-through' },
-        { label: 'H1', cmd: 'toggleHeading', active: editor.isActive('heading', { level: 1 }), cls: '' },
-        { label: 'H2', cmd: 'toggleHeading2', active: editor.isActive('heading', { level: 2 }), cls: '' },
-        { label: '❝', cmd: 'toggleBlockquote', active: editor.isActive('blockquote'), cls: '' },
-        { label: '•', cmd: 'toggleBulletList', active: editor.isActive('bulletList'), cls: '' },
-        { label: '1.', cmd: 'toggleOrderedList', active: editor.isActive('orderedList'), cls: '' },
-      ] as const" :key="btn.cmd">
+      <template
+        v-for="btn in [
+          { label: 'B', cmd: 'toggleBold', active: editor.isActive('bold'), cls: 'font-bold' },
+          { label: 'I', cmd: 'toggleItalic', active: editor.isActive('italic'), cls: 'italic' },
+          { label: 'S', cmd: 'toggleStrike', active: editor.isActive('strike'), cls: 'line-through' },
+          { label: 'H1', cmd: 'toggleHeading', active: editor.isActive('heading', { level: 1 }), cls: '' },
+          { label: 'H2', cmd: 'toggleHeading2', active: editor.isActive('heading', { level: 2 }), cls: '' },
+          { label: '❝', cmd: 'toggleBlockquote', active: editor.isActive('blockquote'), cls: '' },
+          { label: '•', cmd: 'toggleBulletList', active: editor.isActive('bulletList'), cls: '' },
+          { label: '1.', cmd: 'toggleOrderedList', active: editor.isActive('orderedList'), cls: '' },
+        ] as const" :key="btn.cmd"
+      >
         <BaseButton
           variant="ghost"
           size="icon"
