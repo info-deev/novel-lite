@@ -2,7 +2,7 @@
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import CharacterCount from '@tiptap/extension-character-count';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useBookStore } from '@/stores/book';
 import { useCodexStore } from '@/stores/codex';
 import { eventBus, AppEvents } from '@/core/eventBus';
@@ -17,12 +17,18 @@ const showMeta = ref(true);
 const savedAt = ref<string | null>(null);
 
 const editor = useEditor({
-  content: '',
+  content: book.activeScene?.content ?? '',
   extensions: [StarterKit, CharacterCount],
   editorProps: {
     attributes: { class: 'tiptap px-6 py-5 focus:outline-none sm:px-10', spellcheck: 'true' },
   },
+  onCreate: () => {
+    // Страховка: если стартовый контент не применился (редактор инициализируется
+    // асинхронно), подтянем HTML активной сцены из стора.
+    syncEditorWithStore();
+  },
   onUpdate: () => {
+    if (loadFromStore) return; // не пишем обратно во время загрузки HTML из стора
     const scene = book.activeScene;
     if (scene && editor.value) {
       book.updateScene(scene.id, { content: editor.value.getHTML() });
@@ -30,17 +36,60 @@ const editor = useEditor({
   },
 });
 
+// Синхронизация контента сцены <-> редактор.
+// loadFromStore — флаг «редактор сейчас загружает HTML из стора»: пока он true,
+// onUpdate не должен писать контент обратно (иначе пустой стартовый документ
+// перезаписал бы сохранённый текст сцены).
+let loadFromStore = false;
+
+function syncEditorWithStore(): void {
+  const ed = editor.value;
+  if (!ed) return; // watch с immediate firing раньше создания редактора —
+  // начальный контент уже передан в useEditor({ content }).
+  const html = book.activeScene?.content ?? '';
+  loadFromStore = true;
+  try {
+    if (ed.getHTML() !== html) ed.commands.setContent(html, { emitUpdate: false });
+  } finally {
+    loadFromStore = false;
+  }
+}
+
+watch(() => book.activeSceneId, syncEditorWithStore, { immediate: true });
+
+// Tiptap может быть ещё не готов на первом тике watch — догоняем, как только появится.
 watch(
-  () => book.activeSceneId,
-  (id) => {
-    const scene = book.scenes.find((s) => s.id === id);
-    if (editor.value) {
-      const html = scene?.content ?? '';
-      if (editor.value.getHTML() !== html) editor.value.commands.setContent(html, { emitUpdate: false });
+  () => editor.value,
+  (ed) => {
+    if (ed && !loadFromStore && ed.isEmpty && (book.activeScene?.content ?? '') !== '') {
+      syncEditorWithStore();
     }
   },
-  { immediate: true },
 );
+
+function flushActiveScene(): void {
+  // Принудительно сохраняем недописанные правки при уходе с экрана редактора,
+  // чтобы возврат из настроек показывал актуальный текст.
+  const ed = editor.value;
+  const scene = book.activeScene;
+  if (ed && scene) {
+    const html = ed.getHTML();
+    if (html !== scene.content) book.updateScene(scene.id, { content: html });
+  }
+  void book.saveNow();
+}
+
+onBeforeUnmount(flushActiveScene);
+
+function onVisibilityChange(): void {
+  if (document.visibilityState === 'hidden') flushActiveScene();
+}
+document.addEventListener('visibilitychange', onVisibilityChange);
+window.addEventListener('pagehide', flushActiveScene);
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('pagehide', flushActiveScene);
+});
 
 watch(
   () => book.saveState,

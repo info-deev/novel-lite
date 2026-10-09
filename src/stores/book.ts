@@ -51,23 +51,53 @@ export const useBookStore = defineStore('book', () => {
   const dirtySceneIds = ref(new Set<string>());
 
   async function flushScenes(): Promise<void> {
-    for (const id of dirtySceneIds.value) {
-      const scene = scenes.value.find((s) => s.id === id);
-      if (scene) await idb.putScene(scene);
-    }
+    // Снимает снимок «до» очистки, чтобы запись в IndexedDB не гонялась
+    // с новым потоком правок (set/copy атомарны в рамках тика event loop).
+    const pending = [...dirtySceneIds.value];
     dirtySceneIds.value = new Set();
+    for (const id of pending) {
+      const scene = scenes.value.find((s) => s.id === id);
+      if (scene) await idb.putScene(toPlain(scene));
+    }
+  }
+
+  /**
+   * Возвращает plain-копию объекта для записи в IndexedDB.
+   * Иначе structured clone падает на прокси/сигналах Vue (DataCloneError).
+   */
+  function toPlain<T extends object>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
   }
 
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
+  let flushing: Promise<void> | null = null;
+
   function markDirty(id: string): void {
     dirtySceneIds.value.add(id);
     if (saveTimer) clearTimeout(saveTimer);
     saveState.value = 'saving';
     saveTimer = setTimeout(() => {
-      void flushScenes().then(() => {
-        saveState.value = 'saved';
-      });
+      saveTimer = undefined;
+      void saveNow();
     }, 600);
+  }
+
+  /** Принудительно сохраняет все грязные сцены (debounce-таймер сбрасывается). */
+  async function saveNow(): Promise<void> {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = undefined;
+    }
+    if (!flushing) {
+      saveState.value = 'saving';
+      flushing = flushScenes().finally(() => {
+        flushing = null;
+      });
+    }
+    await flushing;
+    saveState.value = 'saved';
+    // Если во время записи появились новые правки — сохраняем их следующим заходом.
+    if (dirtySceneIds.value.size > 0) void saveNow();
   }
 
   function setActiveScene(id: string | null): void {
@@ -105,7 +135,7 @@ export const useBookStore = defineStore('book', () => {
       updatedAt: Date.now(),
     };
     scenes.value.push(scene);
-    void idb.putScene(scene);
+    void idb.putScene(toPlain(scene));
     return scene;
   }
 
@@ -155,7 +185,7 @@ export const useBookStore = defineStore('book', () => {
   }
 
   async function persistOrders(): Promise<void> {
-    for (const s of scenes.value) await idb.putScene(s);
+    for (const s of scenes.value) await idb.putScene(toPlain(s));
   }
 
   function addAct(): Act {
@@ -167,7 +197,7 @@ export const useBookStore = defineStore('book', () => {
       order: acts.value.length,
     };
     acts.value.push(act);
-    void idb.putAct(act);
+    void idb.putAct(toPlain(act));
     return act;
   }
 
@@ -175,7 +205,7 @@ export const useBookStore = defineStore('book', () => {
     const idx = acts.value.findIndex((a) => a.id === id);
     if (idx < 0) return;
     acts.value[idx] = { ...acts.value[idx], ...patch };
-    void idb.putAct(acts.value[idx]);
+    void idb.putAct(toPlain(acts.value[idx]));
   }
 
   function deleteAct(id: string): void {
@@ -187,10 +217,13 @@ export const useBookStore = defineStore('book', () => {
   function updateBook(patch: Partial<Omit<BookMeta, 'id'>>): void {
     if (!book.value) return;
     book.value = { ...book.value, ...patch, updatedAt: Date.now() };
-    void idb.putBook(book.value);
+    void idb.putBook(toPlain(book.value));
   }
 
   async function resetToDemo(): Promise<void> {
+    // Сначала дописываем грязные сцены, чтобы clearAll() не «съел» незаписанные правки.
+    await saveNow();
+    dirtySceneIds.value = new Set();
     await idb.clearAll();
     acts.value = [];
     scenes.value = [];
@@ -200,6 +233,13 @@ export const useBookStore = defineStore('book', () => {
   }
 
   async function importData(data: { book: BookMeta; acts: Act[]; scenes: Scene[] }): Promise<void> {
+    // Отменяем незавершённый автосейв старых сцен — он не должен перезаписать импортированные.
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = undefined;
+    }
+    dirtySceneIds.value = new Set();
+    await flushing;
     await idb.clearAll();
     await idb.putBook(data.book);
     for (const act of data.acts) await idb.putAct(act);
@@ -222,6 +262,7 @@ export const useBookStore = defineStore('book', () => {
     scenesByAct,
     totalWords,
     load,
+    saveNow,
     setActiveScene,
     updateScene,
     addScene,
