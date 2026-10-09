@@ -1,58 +1,35 @@
 <script setup lang="ts">
-import { onKeydown } from '@/shared/ui/dialogProvider';
+import { ref, watch } from 'vue';
+import { cn } from '@/shared/ui/lib/utils';
+import { DialogContent, DialogRoot } from '@/shared/ui/components/dialog';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     open: boolean;
     labelledBy?: string;
     maxWidth?: string;
+    class?: string;
   }>(),
-  { labelledBy: undefined, maxWidth: 'max-w-md' },
+  { labelledBy: undefined, maxWidth: 'max-w-md', class: '' },
 );
 
 const emit = defineEmits<{ close: [] }>();
+
+const isOpen = ref(props.open);
+watch(() => props.open, (v) => (isOpen.value = v));
+watch(isOpen, (v) => { if (!v) emit('close'); });
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="dialog">
-      <div
-        v-if="open"
-        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-        role="presentation"
-        @click.self="emit('close')"
-        @keydown="onKeydown"
-      >
-        <div
-          :class="['dialog-panel w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl', maxWidth]"
-          role="alertdialog"
-          aria-modal="true"
-          :aria-labelledby="labelledBy"
-          tabindex="-1"
-          @click.stop
-        >
-          <slot />
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
+  <DialogRoot v-model:open="isOpen">
+    <DialogContent
+      :force-mount="true"
+      role="alertdialog"
+      :aria-labelledby="labelledBy"
+      :max-width="maxWidth"
+      :class="cn('overflow-hidden rounded-xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl', props.class)"
+    >
+      <slot />
+    </DialogContent>
+  </DialogRoot>
 </template>
-
-<style scoped>
-.dialog-enter-active,
-.dialog-leave-active {
-  transition: opacity 150ms ease;
-}
-.dialog-enter-from,
-.dialog-leave-to {
-  opacity: 0;
-}
-.dialog-enter-active .dialog-panel,
-.dialog-leave-active .dialog-panel {
-  transition: transform 150ms ease;
-}
-.dialog-enter-from .dialog-panel,
-.dialog-leave-to .dialog-panel {
-  transform: scale(0.96);
-}
-</style>
