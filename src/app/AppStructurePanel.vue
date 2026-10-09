@@ -62,15 +62,23 @@ function statusDot(scene: Scene): string {
             <span class="ml-auto text-xs text-muted-foreground">{{ group.scenes.length }}</span>
           </summary>
           <ul class="mt-0.5 space-y-0.5 pl-3">
-            <li v-for="scene in group.scenes" :key="scene.id">
+            <li v-for="scene in group.scenes" :key="scene.id" class="group/scene flex items-center gap-1">
               <button
-                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors"
+                class="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors"
                 :class="book.activeSceneId === scene.id ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'"
                 @click="openScene(scene)"
               >
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full" :class="statusDot(scene)" :title="STATUS_LABELS[scene.status]"></span>
                 <span class="truncate">{{ scene.title || 'Без названия' }}</span>
                 <span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground">{{ wordBadge(scene) }}</span>
+              </button>
+              <button
+                class="shrink-0 rounded-md p-1 text-xs text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 group-hover/scene:opacity-100"
+                :class="book.activeSceneId === scene.id ? 'opacity-100' : ''"
+                title="Удалить сцену"
+                @click.stop="book.requestDeleteScene(scene.id)"
+              >
+                ✕
               </button>
             </li>
             <li v-if="group.scenes.length === 0" class="px-2 py-1 text-xs italic text-muted-foreground">Нет сцен</li>

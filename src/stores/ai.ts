@@ -12,6 +12,18 @@ interface OllamaChatChunk {
   error?: string;
 }
 
+interface OllamaModelEntry {
+  name: string;
+}
+
+interface OllamaTagsResponse {
+  models?: OllamaModelEntry[];
+}
+
+function normalizeEndpoint(endpoint: string): string {
+  return endpoint.replace(/\/+$/, '');
+}
+
 export const useAiStore = defineStore('ai', () => {
   const messages = ref<ChatMessage[]>([]);
   const streaming = ref(false);
@@ -73,7 +85,7 @@ export const useAiStore = defineStore('ai', () => {
       const history = messages.value
         .slice(0, -1)
         .map((m) => ({ role: m.role, content: m.content }));
-      const res = await fetch(`${settings.state.endpoint.replace(/\/$/, '')}/api/chat`, {
+      const res = await fetch(`${normalizeEndpoint(settings.state.endpoint)}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
@@ -134,15 +146,60 @@ export const useAiStore = defineStore('ai', () => {
     error.value = null;
   }
 
+  const models = ref<string[]>([]);
+  const modelsLoading = ref(false);
+  const modelsError = ref<string | null>(null);
+
+  async function loadModels(): Promise<string[]> {
+    const settings = useSettingsStore();
+    modelsLoading.value = true;
+    modelsError.value = null;
+    try {
+      const res = await fetch(`${normalizeEndpoint(settings.state.endpoint)}/api/tags`);
+      if (!res.ok) throw new Error(`Ollama ответил ${res.status}`);
+      const data = (await res.json()) as OllamaTagsResponse;
+      const list = Array.isArray(data.models) ? data.models.map((m) => m.name).filter(Boolean).sort() : [];
+      models.value = list;
+      // Если текущая модель недоступна — переключаемся на первую из списка
+      if (list.length > 0 && !list.includes(settings.state.model)) {
+        settings.patch({ model: list[0] });
+      }
+      return list;
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      modelsError.value = err.message.includes('Failed to fetch')
+        ? 'Ollama недоступен по этому endpoint. Проверьте, запущен ли сервер (ollama serve).'
+        : err.message;
+      models.value = [];
+      return [];
+    } finally {
+      modelsLoading.value = false;
+    }
+  }
+
   async function checkHealth(): Promise<boolean> {
     const settings = useSettingsStore();
     try {
-      const res = await fetch(`${settings.state.endpoint.replace(/\/$/, '')}/api/tags`);
+      const res = await fetch(`${normalizeEndpoint(settings.state.endpoint)}/api/tags`);
       return res.ok;
     } catch {
       return false;
     }
   }
 
-  return { messages, streaming, error, includeContext, lastAssistant, send, stop, clear, checkHealth };
+  return {
+    messages,
+    streaming,
+    error,
+    includeContext,
+    lastAssistant,
+    models,
+    modelsLoading,
+    modelsError,
+    send,
+    stop,
+    clear,
+    checkHealth,
+    loadModels,
+  };
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { useAiStore } from '@/stores/ai';
 import { useBookStore } from '@/stores/book';
 import { useSettingsStore } from '@/stores/settings';
@@ -32,6 +32,11 @@ function useSuggestion(s: string): void {
 }
 
 const suggestions = ['Продолжи сцену', 'Опиши атмосферу подробнее', 'Усиль конфликт в сцене', 'Проверь диалоги на естественность'];
+
+onMounted(() => {
+  // Подтягиваем список моделей с локального Ollama для выпадающего списка
+  if (ai.models.length === 0 && !ai.modelsLoading) void ai.loadModels();
+});
 </script>
 
 <template>
@@ -39,7 +44,17 @@ const suggestions = ['Продолжи сцену', 'Опиши атмосфер
     <header class="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5">
       <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI-ассистент</h2>
       <div class="flex items-center gap-1">
+        <select
+          v-if="ai.models.length > 0"
+          :value="settings.state.model"
+          class="max-w-[140px] truncate rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] tabular-nums text-secondary-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          :title="`Модель: ${settings.state.model} (${ai.models.length} доступно)`"
+          @change="settings.patch({ model: ($event.target as HTMLSelectElement).value })"
+        >
+          <option v-for="m in ai.models" :key="m" :value="m">{{ m }}</option>
+        </select>
         <span
+          v-else
           class="rounded-full px-2 py-0.5 text-[10px] tabular-nums"
           :class="ai.streaming ? 'bg-emerald-500/15 text-emerald-500' : 'bg-secondary text-muted-foreground'"
           :title="settings.state.endpoint"

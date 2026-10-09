@@ -147,7 +147,16 @@ function addSceneTo(actId: string): void {
               <p v-if="scene.synopsis" class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{{ scene.synopsis }}</p>
               <div class="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
                 <span>{{ scene.wordCount }} сл.</span>
-                <span class="opacity-0 transition-opacity group-hover:opacity-100">⠿</span>
+                <span class="flex items-center gap-1">
+                  <button
+                    class="rounded p-0.5 opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
+                    title="Удалить сцену"
+                    @click.stop="book.requestDeleteScene(scene.id)"
+                  >
+                    ✕
+                  </button>
+                  <span class="opacity-0 transition-opacity group-hover:opacity-100">⠿</span>
+                </span>
               </div>
             </li>
             <li v-if="(book.scenesByAct.get(act.id) ?? []).length === 0" class="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">

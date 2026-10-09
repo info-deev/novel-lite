@@ -89,6 +89,9 @@ function setStatus(status: SceneStatus): void {
         <span class="h-1.5 w-1.5 rounded-full" :class="book.saveState === 'saving' ? 'animate-pulse bg-amber-400' : 'bg-emerald-500'"></span>
         {{ book.saveState === 'saving' ? 'Сохраняю…' : savedAt ? `Сохранено ${savedAt}` : 'Сохранено' }}
       </span>
+      <BaseButton variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Удалить сцену" @click="book.requestDeleteScene(scene.id)">
+        ✕
+      </BaseButton>
     </header>
 
     <!-- Мета-панель -->
